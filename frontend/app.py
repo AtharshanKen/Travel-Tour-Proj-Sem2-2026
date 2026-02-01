@@ -229,7 +229,7 @@ with lowR[2]: # Sueggestions
     st.session_state['suggest'] = [] # Reset for new session info to be saved when user deselects itinerary
 
 with lowR[3]:# Recmmmendation
-    st.subheader("Alternative Destination:")
+    st.subheader("Alternative Destination")
     # if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
     #     RCArv = st.session_state['RC_alt_Dest']
     #     RCFl = st.session_state['Flght_alt_Dest']  
