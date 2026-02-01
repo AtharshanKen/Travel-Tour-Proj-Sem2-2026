@@ -292,7 +292,7 @@ st.title("Calculate App")
 option = st.selectbox('What Op', ('Add'))
 
 st.write("")
-st.write("Select the number from slider")
+st.write("Select the number from slider---")
 x = st.slider("X",0,100,20)
 y = st.slider("Y",0,100,10)
 
