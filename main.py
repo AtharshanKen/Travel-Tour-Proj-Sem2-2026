@@ -50,11 +50,11 @@ async def forecasting(input:FrCtReq):
 
 class RecReq(BaseModel):
     NewR:list
-    main:pd.DataFrame
+    main:list[dict]
     loc:str
 @app.post("/Recommendation")
 async def recommendation(input:RecReq):
-    return KNN_MD(input.NewR,input.main,input.loc).to_dict(orient="records")
+    return KNN_MD(input.NewR,pd.DataFrame(input.main),input.loc).to_dict(orient="records")
 
 # class Input(BaseModel):
 #     op:str
