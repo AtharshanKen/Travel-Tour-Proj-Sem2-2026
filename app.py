@@ -165,7 +165,6 @@ with midR[1]:
         locNL = pois['Location_Name'].unique().tolist()
         sel_locN = st.selectbox("Choose a Destination:",
                         locNL,
-                        options=[''],
                         index=None,
                         placeholder="Select...",
                         key="sel_locN")
