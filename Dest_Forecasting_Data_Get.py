@@ -21,6 +21,8 @@ def Dest_Forecastig_Data_Get(dfs_comb:pd.DataFrame,flights:pd.DataFrame): # Get 
         # FC = ARIMA_MD(MetaData['Location_ID'],MetaData['Latitude'],MetaData['Longitude']) # Get Forecast for POI
         FC = requests.post(f"{API_URL}/Forecasting",json={"loc":MetaData['Location_ID'],"lat":MetaData['Latitude'],"long":MetaData['Longitude']}).json()
         FC = pd.DataFrame(FC)
+        print(FC.columns)
+        
         FC['Date'] = FC['Date'].apply(lambda x : pd.Timestamp(x).date())#datetime.date(YYYY, MM, DD)
         
         st.session_state['FC_sel_Dest'] = FC # save to sesssion state]
