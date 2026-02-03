@@ -16,7 +16,7 @@ if api is None:
 client = OpenAI(api_key=api)
 
 # Used for Getting forecasting data from selected location 
-from Dest_Forecasting_Data_Get import Dest_Forecastig_Data_Get 
+# from Dest_Forecasting_Data_Get import Dest_Forecastig_Data_Get 
 
 # Function handles itinerary changes 
 from poisUpdate import poisUpdate
