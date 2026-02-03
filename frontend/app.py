@@ -7,6 +7,30 @@ from datetime import date,timedelta
 from dateutil import parser
 import plotly.express as px
 
+#^ Getting OpenAI Key---------------------------
+from openai import OpenAI
+#Set key from secrets 
+api = os.environ.get("OPENAI_API_KEY")
+if api is None:
+    api = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=api)
+
+# Used for Getting forecasting data from selected location 
+# from Dest_Forecasting_Data_Get import Dest_Forecastig_Data_Get 
+
+# Function handles itinerary changes 
+from poisUpdate import poisUpdate
+
+#^ Backend Connection----------------------------
+# In Docker/Heroku you’ll point this to the backend service URL
+API_URL = os.getenv("API_URL", "http://localhost:8000")
+
+#^ Getting main data-----------------------------
+res = requests.post(f"{API_URL}/dfs_flgh_data").json()
+res = [pd.DataFrame(item) for item in res]
+dfs_comb = res[0]
+flights = res[1]
+
 #^ PAGE CONFIGURATION---------------------------- 
 st.set_page_config(
     page_title="Start Your Travel Journey", 
@@ -25,6 +49,46 @@ page_bg_img = '''
 [data-testid="stHeader"] {background: rgba(0,0,0,0);}
 </style>'''
 st.markdown(page_bg_img, unsafe_allow_html=True)
+
+#^ SESSION RELATED-----------------------------
+# --- OPENAI DEF MODEL ---
+if "openai_model" not in st.session_state:
+    st.session_state["openai_model"] = "gpt-3.5-turbo"
+if "messages" not in st.session_state:# Initialize chat history
+    st.session_state.messages = []
+# --- SUGGESTIONS & ALT RECOMMENDATIONS TEXT ---
+if "suggest" not in st.session_state:
+    st.session_state["suggest"] = []
+if "recommend" not in st.session_state:
+    st.session_state["recommend"] = []
+# --- HOUSING FORECAST & RECOMMEND & FLIGHT DATA ---
+if 'FC_sel_Dest' not in st.session_state:
+    st.session_state['FC_sel_Dest'] = pd.DataFrame()
+if 'Flght_sel_Dest' not in st.session_state:
+    st.session_state['Flght_sel_Dest'] = pd.DataFrame()
+if 'RC_alt_Dest' not in st.session_state:
+    st.session_state['RC_alt_Dest'] = pd.DataFrame()
+if 'Flght_alt_Dest' not in st.session_state:
+    st.session_state['Flght_alt_Dest'] = pd.DataFrame()
+# --- HOUSING USER SELECTIONS ---
+if 'user_sel' not in st.session_state:
+    st.session_state['user_sel'] = [None,None,None,None,None,None]
+# ---- SESSION STATE INIT ----
+for k in ["sel_att_cat","sel_att_type","sel_org","sel_Arv_dte","sel_crowd","sel_temp","sel_locN"]:
+    if k not in st.session_state:
+        st.session_state[k] = None
+# ---- CALLBACKS ----
+def update_user_sel():#Updating user_sel list to reflect new setting changes 
+    st.session_state['user_sel'][0] = st.session_state['sel_org']
+    st.session_state['user_sel'][1] = st.session_state['sel_Arv_dte']
+    st.session_state['user_sel'][2] = st.session_state['sel_att_cat']
+    if st.session_state['sel_att_cat'] == None:
+        st.session_state['sel_att_type'] = None
+    st.session_state['user_sel'][3] = st.session_state['sel_att_type']
+    st.session_state['user_sel'][4] = st.session_state['sel_crowd']
+    st.session_state['user_sel'][5] = st.session_state['sel_temp']
+
+pois = poisUpdate(dfs_comb) # used by the destination selection
 
 #^ LAYOUT STRUCTURE---------------------------- 
 O_W = 1
@@ -45,12 +109,11 @@ with midR[1]:
 
     with ops[1]:
         sel_org = st.selectbox("Choose an Orgin:",
-                               options=[''],
-                            #flights['City_dp'].unique().tolist(),
+                            flights['City_dp'].unique().tolist(),
                             index=None,
                             placeholder="Select...",
-                            key="sel_org")
-                            #,on_change=update_user_sel)
+                            key="sel_org"
+                            ,on_change=update_user_sel)
 
     with ops[2]:
         nextday = date.today() + timedelta(days=1)
@@ -60,55 +123,53 @@ with midR[1]:
             min_value=nextday,
             max_value=MaxD,
             format="YYYY-MM-DD",
-            key="sel_Arv_dte")
-            #,on_change=update_user_sel)
+            key="sel_Arv_dte"
+            ,on_change=update_user_sel)
 
     with ops[3]:
-        #AttCatL = dfs_comb['Attraction_Category'].unique().tolist()
+        AttCatL = dfs_comb['Attraction_Category'].unique().tolist()
         sel_att_cat = st.selectbox("Choose Attraction Category:",
-                                #AttCatL,
-                                options=[''],
+                                AttCatL,
                                 index=None,
                                 key="sel_att_cat",
-                                placeholder="Select...")
-                                #,on_change=update_user_sel)
+                                placeholder="Select...",
+                                on_change=update_user_sel)
 
     with ops[4]:
-        #att_type_list = dfs_comb[dfs_comb['Attraction_Category'] == sel_att_cat]['Type_of_Attraction'].unique().tolist() if sel_att_cat else []
+        att_type_list = dfs_comb[dfs_comb['Attraction_Category'] == sel_att_cat]['Type_of_Attraction'].unique().tolist() if sel_att_cat else []
         sel_att_type = st.selectbox("Choose Attraction Type:",
-                                #att_type_list,
-                                options=[''],
+                                att_type_list,
                                 index=None,
                                 placeholder="Select...",
                                 disabled=(sel_att_cat == None),
-                                key="sel_att_type")
-                                #,on_change=update_user_sel)
+                                key="sel_att_type"
+                                ,on_change=update_user_sel)
 
     with ops[5]:
         sel_crowd = st.selectbox("Choose Crowd level:",
                         ['LOW','MEDIUM','HIGH'],
                         index=None,
                         placeholder="Select...",
-                        key="sel_crowd")
-                        #,on_change=update_user_sel)
+                        key="sel_crowd"
+                        ,on_change=update_user_sel)
 
     with ops[6]:
         sel_temp = st.selectbox("Choose Temp level:",
                         ['LOW','MEDIUM','HIGH'],
                         index=None,
                         placeholder="Select...",
-                        key="sel_temp")
-                        #,on_change=update_user_sel)
+                        key="sel_temp"
+                        ,on_change=update_user_sel)
     
     with ops[7]:
-        #locNL = pois['Location_Name'].unique().tolist()
+        locNL = pois['Location_Name'].unique().tolist()
         sel_locN = st.selectbox("Choose a Destination:",
-                        #locNL,
+                        locNL,
                         options=[''],
                         index=None,
                         placeholder="Select...",
                         key="sel_locN")
-        #if sel_locN != None: Dest_Forecastig_Data_Get(dfs_comb,flights)
+        # if sel_locN != None: Dest_Forecastig_Data_Get(dfs_comb,flights)
 
 with midR[2]:
     # Update figure with new data if Orgin,Avr Time,Dest have been selected
@@ -284,19 +345,16 @@ with lowR[1]:
         """, unsafe_allow_html=True)
 
 
-# In Docker/Heroku you’ll point this to the backend service URL
-API_URL = os.getenv("API_URL", "http://localhost:8000")
+# st.title("Calculate App")
 
-st.title("Calculate App")
+# option = st.selectbox('What Op', ('Add'))
 
-option = st.selectbox('What Op', ('Add'))
+# st.write("")
+# st.write("Select the number from slider---")
+# x = st.slider("X",0,100,20)
+# y = st.slider("Y",0,100,10)
 
-st.write("")
-st.write("Select the number from slider---")
-x = st.slider("X",0,100,20)
-y = st.slider("Y",0,100,10)
-
-if st.button('Calculate'):
-    print(json.dumps({"op":'Add',"x":x,"y":y}))
-    res = requests.post(f"{API_URL}/Cal", json={"op":'Add',"x":x,"y":y})
-    st.subheader(f"Response from API = {res.text}")
+# if st.button('Calculate'):
+#     print(json.dumps({"op":'Add',"x":x,"y":y}))
+#     res = requests.post(f"{API_URL}/Cal", json={"op":'Add',"x":x,"y":y})
+#     st.subheader(f"Response from API = {res.text}")
