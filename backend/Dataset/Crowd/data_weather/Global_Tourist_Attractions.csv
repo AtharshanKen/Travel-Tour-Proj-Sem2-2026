@@ -1,0 +1,31 @@
+Location_Name,Type_of_Attraction,Attraction_Category,City,Country,Latitude,Longitude,Location_ID
+CN Tower,Tower,Urban Landmark,Toronto,Canada,43.6426,-79.3871,CNTOR_1
+Royal Ontario Museum,Museum,Culture & History,Toronto,Canada,43.6677,-79.3948,CNTOR_2
+Distillery District,Historic District,Culture & History,Toronto,Canada,43.65,-79.359,CNTOR_3
+High Park,Park,Nature & Outdoor,Toronto,Canada,43.6465,-79.4637,CNTOR_4
+Harbourfront Centre,Waterfront,Urban & Leisure,Toronto,Canada,43.6387,-79.382,CNTOR_5
+Sydney Opera House,Performing Arts,Urban Landmark,Sydney,Australia,-33.8568,151.2153,AUSSYD_1
+Sydney Harbour Bridge,Bridge,Urban Landmark,Sydney,Australia,-33.8523,151.2108,AUSSYD_2
+Bondi Beach,Beach,Nature & Outdoor,Sydney,Australia,-33.8908,151.2743,AUSSYD_3
+Darling Harbour,Waterfront,Urban & Leisure,Sydney,Australia,-33.8728,151.1986,AUSSYD_4
+Taronga Zoo,Zoo,Family & Wildlife,Sydney,Australia,-33.843,151.2417,AUSSYD_5
+Federation Square,Public Square,Urban Landmark,Melbourne,Australia,-37.8179,144.9691,AUSMEL_1
+Melbourne Museum,Museum,Culture & History,Melbourne,Australia,-37.8033,144.9717,AUSMEL_2
+St Kilda Beach,Beach,Nature & Outdoor,Melbourne,Australia,-37.8676,144.9809,AUSMEL_3
+Royal Botanic Gardens Melbourne,Botanic Garden,Nature & Outdoor,Melbourne,Australia,-37.8304,144.9796,AUSMEL_4
+Queen Victoria Market,Market,Shopping & Dining,Melbourne,Australia,-37.8077,144.9576,AUSMEL_5
+West Edmonton Mall,Mall,Shopping & Leisure,Edmonton,Canada,53.5231,-113.6246,CNEDM_1
+Fort Edmonton Park,Heritage Park,Culture & History,Edmonton,Canada,53.5084,-113.5713,CNEDM_2
+Muttart Conservatory,Conservatory,Nature & Outdoor,Edmonton,Canada,53.5331,-113.4668,CNEDM_3
+Royal Alberta Museum,Museum,Culture & History,Edmonton,Canada,53.5448,-113.4861,CNEDM_4
+Ice District,Entertainment District,Urban & Leisure,Edmonton,Canada,53.5461,-113.497,CNEDM_5
+Trinity College & Book of Kells,University,Culture & History,Dublin,Ireland,53.3438,-6.2546,IRDUB_1
+Guinness Storehouse,Brewery Experience,Culture & History,Dublin,Ireland,53.3419,-6.286,IRDUB_2
+St Stephen’s Green,Park,Nature & Outdoor,Dublin,Ireland,53.3382,-6.2591,IRDUB_3
+Temple Bar District,Entertainment District,Urban & Leisure,Dublin,Ireland,53.3457,-6.2665,IRDUB_4
+Dublin Castle,Historic Site,Culture & History,Dublin,Ireland,53.3429,-6.2675,IRDUB_5
+Sky Tower,Tower,Urban Landmark,Auckland,New Zealand,-36.8485,174.7633,NZAUK_1
+Auckland War Memorial Museum,Museum,Culture & History,Auckland,New Zealand,-36.8605,174.7773,NZAUK_2
+Mount Eden (Maungawhau),Volcanic Cone,Nature & Outdoor,Auckland,New Zealand,-36.8793,174.7656,NZAUK_3
+Waiheke Island,Island,Nature & Outdoor,Auckland,New Zealand,-36.807,175.075,NZAUK_4
+Viaduct Harbour,Waterfront,Urban & Leisure,Auckland,New Zealand,-36.8422,174.7588,NZAUK_5
