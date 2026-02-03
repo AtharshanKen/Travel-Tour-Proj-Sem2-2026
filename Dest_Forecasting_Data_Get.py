@@ -49,7 +49,7 @@ def Dest_Forecastig_Data_Get(dfs_comb:pd.DataFrame,flights:pd.DataFrame): # Get 
                 FC['Weather_Precipitation_Sum'].loc[FC['Date'] == st.session_state['sel_Arv_dte']],
                 FC['Weather_Relative_Humidity_Avg'].loc[FC['Date'] == st.session_state['sel_Arv_dte']]]
         # RC = KNN_MD(NEwR,dfs_comb,MetaData['Location_ID']) # Get recommended areas with less crowd
-        RC = requests.post(f"{API_URL}/Recommendation",json={"NewR":NEwR,"main":dfs_comb,"loc":MetaData['Location_ID']}).json()
+        RC = requests.post(f"{API_URL}/Recommendation",json={"NewR":NEwR,"main":dfs_comb.to_dict(orient="record"),"loc":MetaData['Location_ID']}).json()
         RC = pd.DataFrame(RC)
         st.session_state['RC_alt_Dest'] = RC # save to sesssion state
 
