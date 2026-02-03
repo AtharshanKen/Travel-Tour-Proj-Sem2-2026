@@ -6,6 +6,10 @@ from dateutil import parser
 import pandas as pd
 import os
 
+# Model Exc File
+from arima_model import ARIMA_MD 
+from knn_model import KNN_MD
+
 folder1 = "./Dataset/Crowd/data_weather/Final"
 dfs_comb = pd.DataFrame()
 for df in [pd.read_csv(os.path.join(folder1,f)) for f in os.listdir(folder1) if f.endswith('.csv')]:
@@ -36,19 +40,21 @@ async def dfs_flgh_data():
 #             dfs_comb['Type_of_Attraction'].unique().tolist(),
 #             pois['Location_Name'].unique().tolist()]
 
-# class FrCtReq(BaseModel):
-#     model:str
-#     origin:str
-#     arrival_date:str
-#     dest:str
-# @app.post("/Forecasting")
-# async def forecasting(input:FrCtReq):
-#     return 
+class FrCtReq(BaseModel):
+    loc:str
+    lat:str
+    long:str
+@app.post("/Forecasting")
+async def forecasting(input:FrCtReq):
+    return ARIMA_MD(input.loc,input.lat,input.long).to_dict(orient="records")
 
-# @app.post("/Recommendation")
-# async def recommendation():
-#     return 
-
+class RecReq(BaseModel):
+    NewR:list
+    main:pd.DataFrame
+    loc:str
+@app.post("/Recommendation")
+async def recommendation(input:RecReq):
+    return KNN_MD(input.NewR,input.main,input.loc).to_dict(orient="records")
 
 # class Input(BaseModel):
 #     op:str

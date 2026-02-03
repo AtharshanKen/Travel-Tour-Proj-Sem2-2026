@@ -16,7 +16,7 @@ if api is None:
 client = OpenAI(api_key=api)
 
 # Used for Getting forecasting data from selected location 
-# from Dest_Forecasting_Data_Get import Dest_Forecastig_Data_Get 
+from Dest_Forecasting_Data_Get import Dest_Forecastig_Data_Get 
 
 # Function handles itinerary changes 
 from poisUpdate import poisUpdate
@@ -168,38 +168,38 @@ with midR[1]:
                         index=None,
                         placeholder="Select...",
                         key="sel_locN")
-        # if sel_locN != None: Dest_Forecastig_Data_Get(dfs_comb,flights)
+        if sel_locN != None: Dest_Forecastig_Data_Get(dfs_comb,flights)
 
 with midR[2]:
     # Update figure with new data if Orgin,Avr Time,Dest have been selected
-    # if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
-        # # Get Only the selected location, attach the storeded FC session data to historical data
-        # pltdata = dfs_comb[dfs_comb['Location_Name'] == st.session_state['sel_locN']]
-        # pltdata = pd.concat([pltdata,st.session_state['FC_sel_Dest']],axis='index')[['Date','Avg_Daily_Pedestrian_Count']]
-        # pltdata['Date'] = pltdata['Date'].apply(lambda x: pd.to_datetime(x.strftime('%Y-%m-%d')))
+    if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
+        # Get Only the selected location, attach the storeded FC session data to historical data
+        pltdata = dfs_comb[dfs_comb['Location_Name'] == st.session_state['sel_locN']]
+        pltdata = pd.concat([pltdata,st.session_state['FC_sel_Dest']],axis='index')[['Date','Avg_Daily_Pedestrian_Count']]
+        pltdata['Date'] = pltdata['Date'].apply(lambda x: pd.to_datetime(x.strftime('%Y-%m-%d')))
 
-        # # Resample for monthly from daily, provides a better visual of the older + new data
-        # pltdata = pltdata.set_index('Date').resample('ME').mean().reset_index()
-        # pltdata = pltdata.rename(columns={
-        #     'Avg_Daily_Pedestrian_Count':'Avg Monthly Crowd Count',
-        #     })
-        # Tinfo = dfs_comb[['City','Country','Location_Name']].loc[dfs_comb['Location_Name'] == st.session_state['sel_locN']].drop_duplicates().reset_index()
-        # fig = px.line(
-        #         pltdata,
-        #         x='Date',
-        #         y='Avg Monthly Crowd Count',
-        #         title=f"{Tinfo['Location_Name'].loc[0]} — Monthly Trend ---- [{Tinfo['Country'].loc[0]}/{Tinfo['City'].loc[0]}]",
-        #         markers=True
-        #     )
-        
-        # # Adding Forecast vertical line 
-        # fig.add_vline(x=parser.parse('2025-09-30').timestamp()*1000, line_width=2, line_dash="dash", line_color="red", annotation_text="Forecast Start", annotation_position="bottom right")
-    
-    # else: # If user deselectes Orgin,Arv Time,Dest, then reset graph. 
-    fig = px.line(
-                title=f"Destination-Orgin-Time not Selected",
+        # Resample for monthly from daily, provides a better visual of the older + new data
+        pltdata = pltdata.set_index('Date').resample('ME').mean().reset_index()
+        pltdata = pltdata.rename(columns={
+            'Avg_Daily_Pedestrian_Count':'Avg Monthly Crowd Count',
+            })
+        Tinfo = dfs_comb[['City','Country','Location_Name']].loc[dfs_comb['Location_Name'] == st.session_state['sel_locN']].drop_duplicates().reset_index()
+        fig = px.line(
+                pltdata,
+                x='Date',
+                y='Avg Monthly Crowd Count',
+                title=f"{Tinfo['Location_Name'].loc[0]} — Monthly Trend ---- [{Tinfo['Country'].loc[0]}/{Tinfo['City'].loc[0]}]",
                 markers=True
             )
+        
+        # Adding Forecast vertical line 
+        fig.add_vline(x=parser.parse('2025-09-30').timestamp()*1000, line_width=2, line_dash="dash", line_color="red", annotation_text="Forecast Start", annotation_position="bottom right")
+    
+    else: # If user deselectes Orgin,Arv Time,Dest, then reset graph. 
+        fig = px.line(
+                    title=f"Destination-Orgin-Time not Selected",
+                    markers=True
+                )
     
     fig.update_layout(title=dict(font=dict(size=24)),
                       font=dict(size=24),
