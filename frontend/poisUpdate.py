@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 
 
-def poisUpdate(dfs_comb:pd.DataFrame) -> pd.DataFrame: # Function handles itinerary changes 
+def poisUpdate() -> pd.DataFrame: # Function handles itinerary changes 
+    dfs_comb = st.session_state["dfs_main"]
     Query = st.session_state['user_sel'] # grab user current itinerary selection 
     Query = Query[2:] # Date and Orgin not needed 
 
