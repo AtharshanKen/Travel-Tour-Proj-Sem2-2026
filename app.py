@@ -25,12 +25,6 @@ from poisUpdate import poisUpdate
 # In Docker/Heroku you’ll point this to the backend service URL
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
-#^ Getting main data-----------------------------
-res = requests.post(f"{API_URL}/dfs_flgh_data").json()
-res = [pd.DataFrame(item) for item in res]
-dfs_comb = res[0]
-flights = res[1]
-
 #^ PAGE CONFIGURATION---------------------------- 
 st.set_page_config(
     page_title="Start Your Travel Journey", 
@@ -50,7 +44,26 @@ page_bg_img = '''
 </style>'''
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
+def date_conv_from(df:pd.DataFrame,dates:list) -> pd.DataFrame:
+    for cn in dates:
+        df[cn] = pd.to_datetime(df[cn], errors="coerce").dt.date
+    return df
+
 #^ SESSION RELATED-----------------------------
+# --- PRE LOADED BACKEND DATA ---
+if "dfs_main" not in st.session_state and "flight_main" not in st.session_state:
+    #^ Getting main data-----------------------------
+    res = requests.post(f"{API_URL}/dfs_flgh_data").json()
+    res = [pd.DataFrame(item) for item in res]
+    st.session_state["dfs_main"] = date_conv_from(res[0],['Date'])
+    st.session_state["flight_main"] = date_conv_from(res[1],['apt_time_dt_ds','apt_time_dt_dp'])
+    # print(type(st.session_state["dfs_main"]['Date'].loc[0]))
+    # print(type(st.session_state["flight_main"]['apt_time_dt_ds'].loc[0]))
+    # st.session_state["dfs_main"]['Date'] = st.session_state["dfs_main"]['Date'].apply(lambda x: parser.parse(x).date())#datetime.date(YYYY, MM, DD)
+    # st.session_state["flight_main"]['apt_time_dt_ds'] = st.session_state["flight_main"]['apt_time_dt_ds'].apply(lambda x: parser.parse(x).date())
+    # st.session_state["flight_main"]['apt_time_dt_dp'] = st.session_state["flight_main"]['apt_time_dt_dp'].apply(lambda x: parser.parse(x).date())
+# print(type(st.session_state["dfs_main"]['Date'].loc[0]))
+# print(type(st.session_state["flight_main"]['apt_time_dt_ds'].loc[0]))
 # --- OPENAI DEF MODEL ---
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-3.5-turbo"
@@ -88,7 +101,7 @@ def update_user_sel():#Updating user_sel list to reflect new setting changes
     st.session_state['user_sel'][4] = st.session_state['sel_crowd']
     st.session_state['user_sel'][5] = st.session_state['sel_temp']
 
-pois = poisUpdate(dfs_comb) # used by the destination selection
+pois = poisUpdate(st.session_state["dfs_main"]) # used by the destination selection
 
 #^ LAYOUT STRUCTURE---------------------------- 
 O_W = 1
@@ -109,7 +122,7 @@ with midR[1]:
 
     with ops[1]:
         sel_org = st.selectbox("Choose an Orgin:",
-                            flights['City_dp'].unique().tolist(),
+                            st.session_state["flight_main"]['City_dp'].unique().tolist(),
                             index=None,
                             placeholder="Select...",
                             key="sel_org"
@@ -127,7 +140,7 @@ with midR[1]:
             ,on_change=update_user_sel)
 
     with ops[3]:
-        AttCatL = dfs_comb['Attraction_Category'].unique().tolist()
+        AttCatL = st.session_state["dfs_main"]['Attraction_Category'].unique().tolist()
         sel_att_cat = st.selectbox("Choose Attraction Category:",
                                 AttCatL,
                                 index=None,
@@ -136,7 +149,7 @@ with midR[1]:
                                 on_change=update_user_sel)
 
     with ops[4]:
-        att_type_list = dfs_comb[dfs_comb['Attraction_Category'] == sel_att_cat]['Type_of_Attraction'].unique().tolist() if sel_att_cat else []
+        att_type_list = st.session_state["dfs_main"][st.session_state["dfs_main"]['Attraction_Category'] == sel_att_cat]['Type_of_Attraction'].unique().tolist() if sel_att_cat else []
         sel_att_type = st.selectbox("Choose Attraction Type:",
                                 att_type_list,
                                 index=None,
@@ -168,13 +181,13 @@ with midR[1]:
                         index=None,
                         placeholder="Select...",
                         key="sel_locN")
-        if sel_locN != None: Dest_Forecastig_Data_Get(dfs_comb,flights)
+        if sel_locN != None: Dest_Forecastig_Data_Get(st.session_state["dfs_main"],st.session_state["flight_main"])
 
 with midR[2]:
     # Update figure with new data if Orgin,Avr Time,Dest have been selected
     if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
         # Get Only the selected location, attach the storeded FC session data to historical data
-        pltdata = dfs_comb[dfs_comb['Location_Name'] == st.session_state['sel_locN']]
+        pltdata = st.session_state["dfs_main"][st.session_state["dfs_main"]['Location_Name'] == st.session_state['sel_locN']]
         pltdata = pd.concat([pltdata,st.session_state['FC_sel_Dest']],axis='index')[['Date','Avg_Daily_Pedestrian_Count']]
         pltdata['Date'] = pltdata['Date'].apply(lambda x: pd.to_datetime(x.strftime('%Y-%m-%d')))
 
@@ -183,7 +196,7 @@ with midR[2]:
         pltdata = pltdata.rename(columns={
             'Avg_Daily_Pedestrian_Count':'Avg Monthly Crowd Count',
             })
-        Tinfo = dfs_comb[['City','Country','Location_Name']].loc[dfs_comb['Location_Name'] == st.session_state['sel_locN']].drop_duplicates().reset_index()
+        Tinfo = st.session_state["dfs_main"][['City','Country','Location_Name']].loc[st.session_state["dfs_main"]['Location_Name'] == st.session_state['sel_locN']].drop_duplicates().reset_index()
         fig = px.line(
                 pltdata,
                 x='Date',
