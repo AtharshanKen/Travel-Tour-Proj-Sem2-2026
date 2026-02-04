@@ -100,7 +100,7 @@ def update_user_sel():#Updating user_sel list to reflect new setting changes
     st.session_state['user_sel'][4] = st.session_state['sel_crowd']
     st.session_state['user_sel'][5] = st.session_state['sel_temp']
 
-pois = poisUpdate(st.session_state["dfs_main"]) # used by the destination selection
+pois = poisUpdate() # used by the destination selection
 
 #^ LAYOUT STRUCTURE---------------------------- 
 O_W = 1
@@ -180,7 +180,7 @@ with midR[1]:
                         index=None,
                         placeholder="Select...",
                         key="sel_locN")
-        if sel_locN != None: Dest_Forecastig_Data_Get(st.session_state["dfs_main"],st.session_state["flight_main"])
+        if sel_locN != None: Dest_Forecastig_Data_Get()
 
 with midR[2]:
     # Update figure with new data if Orgin,Avr Time,Dest have been selected
@@ -242,130 +242,115 @@ st.markdown("""
 # Below are the AI Features for Sugesting and Recommending 
 with lowR[2]: # Sueggestions
     st.subheader("Suggestions")
-    # if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
-    #     # Reterving the Forecast at User Arival Time and Flight Path at the date
-    #     FCArv = st.session_state['FC_sel_Dest'].loc[st.session_state['FC_sel_Dest']['Date'] == st.session_state['sel_Arv_dte']].reset_index(drop=True)
-    #     FLArv = st.session_state['Flght_sel_Dest'].loc[st.session_state['Flght_sel_Dest']['apt_time_dt_ds'] == st.session_state['sel_Arv_dte']].reset_index(drop=True)
+    if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
+        # Reterving the Forecast at User Arival Time and Flight Path at the date
+        FCArv = st.session_state['FC_sel_Dest'].loc[st.session_state['FC_sel_Dest']['Date'] == st.session_state['sel_Arv_dte']].reset_index(drop=True)
+        FLArv = st.session_state['Flght_sel_Dest'].loc[st.session_state['Flght_sel_Dest']['apt_time_dt_ds'] == st.session_state['sel_Arv_dte']].reset_index(drop=True)
 
-    #     FClow = st.session_state['FC_sel_Dest'].loc[st.session_state['FC_sel_Dest']['Avg_Daily_Pedestrian_Count'] < FCArv['Avg_Daily_Pedestrian_Count'].loc[0]]
-    #     FLlow = st.session_state['Flght_sel_Dest'].loc[st.session_state['Flght_sel_Dest']['apt_time_dt_ds'].isin(FClow['Date'].to_list())].reset_index(drop=True)
+        FClow = st.session_state['FC_sel_Dest'].loc[st.session_state['FC_sel_Dest']['Avg_Daily_Pedestrian_Count'] < FCArv['Avg_Daily_Pedestrian_Count'].loc[0]]
+        FLlow = st.session_state['Flght_sel_Dest'].loc[st.session_state['Flght_sel_Dest']['apt_time_dt_ds'].isin(FClow['Date'].to_list())].reset_index(drop=True)
 
-    #     StateBuilder = [] # Logic Statement Builder
+        StateBuilder = [] # Logic Statement Builder
 
-    #     StateBuilder.append(f"""<p class='poi-statO'>Forecast Crowd: {int(FCArv['Avg_Daily_Pedestrian_Count'].loc[0])} people<br></p>""")
+        StateBuilder.append(f"""<p class='poi-statO'>Forecast Crowd: {int(FCArv['Avg_Daily_Pedestrian_Count'].loc[0])} people<br></p>""")
 
-    #     if len(FLArv) > 0: 
-    #         OthFlArv = '<br>'.join([f'{tp['apt_name_dp']} -- {tp['apt_time_dt_dp']} --> {tp['apt_name_ds']} -- {tp['apt_time_dt_ds']}  >>> ${tp['price']}' for i,tp in FLArv.nsmallest(n=20, columns='price').iterrows()][:3])
-    #         StateBuilder.append(
-    #             f"""<p class='poi-statO'>Arvival Date Flight Paths <br> {OthFlArv}</p>"""
-    #         )
-    #     else:
-    #         StateBuilder.append(
-    #             """<p class='poi-statO'>No Flights Path For Arvival Date</p>"""
-    #         )
+        if len(FLArv) > 0: 
+            OthFlArv = '<br>'.join([f'{tp['apt_name_dp']} -- {tp['apt_time_dt_dp']} --> {tp['apt_name_ds']} -- {tp['apt_time_dt_ds']}  >>> ${tp['price']}' for i,tp in FLArv.nsmallest(n=20, columns='price').iterrows()][:3])
+            StateBuilder.append(
+                f"""<p class='poi-statO'>Arvival Date Flight Paths <br> {OthFlArv}</p>"""
+            )
+        else:
+            StateBuilder.append(
+                """<p class='poi-statO'>No Flights Path For Arvival Date</p>"""
+            )
 
-    #     if len(FClow) > 0:
-    #         OthFCLow = '<br>'.join([f'People: {int(tp['Avg_Daily_Pedestrian_Count'])} -- {tp['Date']}' for i,tp in FClow.nsmallest(n=20, columns='Avg_Daily_Pedestrian_Count').iterrows() if tp['Date'] > date.today()][:3]) 
-    #         StateBuilder.append(
-    #             f"""<p class='poi-statO'>Other Dates With Less Arvival Crowd Forecast<br> {OthFCLow}</p>"""
-    #         ) 
-    #     else:
-    #         StateBuilder.append(
-    #             """<p class='poi-statO'>No Other Dates Less than Arvival Date Crowd Forecast </p>"""
-    #         )
+        if len(FClow) > 0:
+            OthFCLow = '<br>'.join([f'People: {int(tp['Avg_Daily_Pedestrian_Count'])} -- {tp['Date']}' for i,tp in FClow.nsmallest(n=20, columns='Avg_Daily_Pedestrian_Count').iterrows() if tp['Date'] > date.today()][:3]) 
+            StateBuilder.append(
+                f"""<p class='poi-statO'>Other Dates With Less Arvival Crowd Forecast<br> {OthFCLow}</p>"""
+            ) 
+        else:
+            StateBuilder.append(
+                """<p class='poi-statO'>No Other Dates Less than Arvival Date Crowd Forecast </p>"""
+            )
 
-    #     if len(FLlow) > 0:
-    #         OthFllow = '<br>'.join([f'{tp['apt_name_dp']} -- {tp['apt_time_dt_dp']} --><br> {tp['apt_name_ds']} -- {tp['apt_time_dt_ds']} >>> ${tp['price']}' for i,tp in FLlow.nsmallest(n=20, columns='price').iterrows()][:3])
-    #         StateBuilder.append(
-    #             f"""<p class='poi-statO'>Other Dates Flight Paths <br> {OthFllow}</p>"""
-    #         )
-    #     else:
-    #         StateBuilder.append(
-    #             """<p class='poi-statO'>No Flights Path For Other Dates</p>\n"""
-    #         )
+        if len(FLlow) > 0:
+            OthFllow = '<br>'.join([f'{tp['apt_name_dp']} -- {tp['apt_time_dt_dp']} --><br> {tp['apt_name_ds']} -- {tp['apt_time_dt_ds']} >>> ${tp['price']}' for i,tp in FLlow.nsmallest(n=20, columns='price').iterrows()][:3])
+            StateBuilder.append(
+                f"""<p class='poi-statO'>Other Dates Flight Paths <br> {OthFllow}</p>"""
+            )
+        else:
+            StateBuilder.append(
+                """<p class='poi-statO'>No Flights Path For Other Dates</p>\n"""
+            )
 
-    #     st.markdown(f"""
-    #         <div class='poi-recbox'>
-    #                 {''.join(StateBuilder)}
-    #         </div>
-    #         """, unsafe_allow_html=True)
+        st.markdown(f"""
+            <div class='poi-recbox'>
+                    {''.join(StateBuilder)}
+            </div>
+            """, unsafe_allow_html=True)
         
-    #     st.session_state['suggest'] = StateBuilder # Save in session for OpenAI to translate to user
+        st.session_state['suggest'] = StateBuilder # Save in session for OpenAI to translate to user
 
-    # else: # Empty div when one of the itinerary selections is deselected
-    st.markdown(f"""
-        <div class='poi-recbox'>
-        </div> 
-        """, unsafe_allow_html=True)
-    
-    st.session_state['suggest'] = [] # Reset for new session info to be saved when user deselects itinerary
+    else: # Empty div when one of the itinerary selections is deselected
+        st.markdown(f"""
+            <div class='poi-recbox'>
+            </div> 
+            """, unsafe_allow_html=True)
+        
+        st.session_state['suggest'] = [] # Reset for new session info to be saved when user deselects itinerary
 
 with lowR[3]:# Recmmmendation
     st.subheader("Alternative Destination")
-    # if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
-    #     RCArv = st.session_state['RC_alt_Dest']
-    #     RCFl = st.session_state['Flght_alt_Dest']  
+    if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
+        RCArv = st.session_state['RC_alt_Dest']
+        RCFl = st.session_state['Flght_alt_Dest']  
  
-    #     StateBuilder2 = [] # Logic Satament Builder
+        StateBuilder2 = [] # Logic Satament Builder
 
-    #     StateBuilder2.append(f"""<p class='poi-statO'>{RCArv['Location_Name']}, {RCArv['Country']}, {RCArv['City']} with past historical crowd numbers 
-    #                         lower than current selected, one of them being {int(RCArv['Avg_Daily_Pedestrian_Count'])} people<br>You could consider traveling to here during {RCArv['Date'].month}/{RCArv["Date"].day}</p>""")
+        StateBuilder2.append(f"""<p class='poi-statO'>{RCArv['Location_Name'].loc[0]}, {RCArv['Country'].loc[0]}, {RCArv['City'].loc[0]} with past historical crowd numbers 
+                            lower than current selected, one of them being {int(RCArv['Avg_Daily_Pedestrian_Count'].loc[0])} people<br>You could consider traveling to here during {RCArv['Date'].loc[0].month}/{RCArv["Date"].loc[0].day}</p>""")
        
-    #     st.markdown(f"""
-    #         <div class='poi-recbox'>
-    #                 {''.join(StateBuilder2)}
-    #         </div>
-    #         """, unsafe_allow_html=True)
+        st.markdown(f"""
+            <div class='poi-recbox'>
+                    {''.join(StateBuilder2)}
+            </div>
+            """, unsafe_allow_html=True)
         
-    #     st.session_state['recommend'] = StateBuilder2 # Save in session for OpenAI to translate to user
+        st.session_state['recommend'] = StateBuilder2 # Save in session for OpenAI to translate to user
 
-    # else: # Empty div when one of the itinerary selections is deselected
-    st.markdown(f"""
-        <div class='poi-recbox'>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.session_state['recommend'] = [] # Reset for new session info to be saved when user deselects itinerary
+    else: # Empty div when one of the itinerary selections is deselected
+        st.markdown(f"""
+            <div class='poi-recbox'>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.session_state['recommend'] = [] # Reset for new session info to be saved when user deselects itinerary
 
 
 with lowR[1]:
     st.subheader("Language Translator")
-    # user_input = ""
-    # language_list = ["English", "French", "Spanish", "German", "Tamil", "Hindi", "Chinese"]
-    # user_input = st.text_area("-", placeholder=f"Type what language to tranlate to\n Languages like: {','.join(language_list)},.etc", label_visibility='hidden')
-    # if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
-    #     if user_input != "":
-    #         resp = client.chat.completions.create(
-    #             model="gpt-4o-mini",
-    #             messages=[
-    #                 {"role":"user","content":f"Translate just the non html of this "+
-    #                                         f"{''.join(st.session_state['suggest'])}{''.join(st.session_state['recommend'])} into {user_input}, "+
-    #                                         "and output only the translated text following the html format"}
-    #             ]
-    #         )
+    user_input = ""
+    language_list = ["English", "French", "Spanish", "German", "Tamil", "Hindi", "Chinese"]
+    user_input = st.text_area("-", placeholder=f"Type what language to tranlate to\n Languages like: {','.join(language_list)},.etc", label_visibility='hidden')
+    if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
+        if user_input != "":
+            resp = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role":"user","content":f"Translate just the non html of this "+
+                                            f"{''.join(st.session_state['suggest'])}{''.join(st.session_state['recommend'])} into {user_input}, "+
+                                            "and output only the translated text following the html format"}
+                ]
+            )
 
-    #         st.markdown(f"""
-    #             <div class='poi-recbox'>
-    #                     {resp.choices[0].message.content}
-    #             </div>
-    #             """, unsafe_allow_html=True)
-    # else: # Empty div when one of the itinerary selections is deselected
-    st.markdown(f"""
-        <div class='poi-recbox'>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# st.title("Calculate App")
-
-# option = st.selectbox('What Op', ('Add'))
-
-# st.write("")
-# st.write("Select the number from slider---")
-# x = st.slider("X",0,100,20)
-# y = st.slider("Y",0,100,10)
-
-# if st.button('Calculate'):
-#     print(json.dumps({"op":'Add',"x":x,"y":y}))
-#     res = requests.post(f"{API_URL}/Cal", json={"op":'Add',"x":x,"y":y})
-#     st.subheader(f"Response from API = {res.text}")
+            st.markdown(f"""
+                <div class='poi-recbox'>
+                        {resp.choices[0].message.content}
+                </div>
+                """, unsafe_allow_html=True)
+    else: # Empty div when one of the itinerary selections is deselected
+        st.markdown(f"""
+            <div class='poi-recbox'>
+            </div>
+            """, unsafe_allow_html=True)
