@@ -1,13 +1,9 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse,Response
 from pydantic import BaseModel
 # from Cal import Cal
 from dateutil import parser
-from typing import Hashable, Any
 import pandas as pd
 import os
-import json
-import numpy as np
 import datetime
 
 # Model Exc File
@@ -19,7 +15,7 @@ dfs_comb = pd.DataFrame()
 for df in [pd.read_csv(os.path.join(folder1,f)) for f in os.listdir(folder1) if f.endswith('.csv')]:
     dfs_comb = pd.concat([dfs_comb,df],axis='rows')
 dfs_comb['Date'] = dfs_comb['Date'].apply(lambda x: parser.parse(x).date())#pd.to_datetime(dfs_comb["Date"]).dt.strftime("%Y-%m-%d %H:%M:%S")#dfs_comb['Date'].apply(lambda x: parser.parse(x).date())#datetime.date(YYYY, MM, DD)
-# print(type(dfs_comb['Date']))
+
 folder2 = "./Dataset/Crowd/Flight/flight_paths.csv"
 flights = pd.read_csv(folder2)
 flights['apt_time_dt_ds'] = flights['apt_time_dt_ds'].apply(lambda x: parser.parse(x).date())#pd.to_datetime(flights["apt_time_dt_ds"]).dt.strftime("%Y-%m-%d %H:%M:%S")#flights['apt_time_dt_ds'].apply(lambda x: parser.parse(x).date())#datetime.date(YYYY, MM, DD)
@@ -47,7 +43,6 @@ async def backend_up():
 
 @app.post("/dfs_flgh_data")
 async def dfs_flgh_data():
-    # print(date_conv_to(dfs_comb,['Date']))
     return [date_conv_to(dfs_comb,['Date']),date_conv_to(flights,['apt_time_dt_ds','apt_time_dt_dp'])]
 
 class FrCtReq(BaseModel):
@@ -59,16 +54,13 @@ async def forecasting(input:FrCtReq):
     return date_conv_to(ARIMA_MD(input.loc,input.lat,input.long),['Date'])
 
 class RecReq(BaseModel):
-    NewR:list[Any]
-    # main:list[dict]
+    NewR:list
+    main:str
     loc:str
 @app.post("/Recommendation")
 async def recommendation(input:RecReq):
     input.NewR[8] = datetime.date.fromisoformat(input.NewR[8])
-    print(input.NewR)
-    print(input.loc)
-    # df = date_conv_from(pd.DataFrame(input.main),['Date'])
-    # print(df.loc[0])
-    # print(type(df['Date'].dtypes))
-    # print(df['Date'].loc[0])
-    # return date_conv_to(KNN_MD(input.NewR,df,input.loc),['Date'])
+    df = date_conv_from(pd.read_json(input.main),['Date'])
+    kn = KNN_MD(input.NewR,df,input.loc)
+    kn['Date'] = pd.to_datetime(kn['Date'], errors="coerce").strftime("%Y-%m-%d %H:%M:%S")
+    return kn.to_dict()
