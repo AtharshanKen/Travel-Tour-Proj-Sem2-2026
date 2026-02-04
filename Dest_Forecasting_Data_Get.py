@@ -19,9 +19,11 @@ def date_conv_from(df:pd.DataFrame,dates:list) -> pd.DataFrame:
         df[cn] = pd.to_datetime(df[cn], errors="coerce").dt.date
     return df
 
-def Dest_Forecastig_Data_Get(dfs_comb:pd.DataFrame,flights:pd.DataFrame): # Get users destination data once orgin and data have been specified
+def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data have been specified
     if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None:
-        
+        dfs_comb = st.session_state['dfs_main'].copy()
+        flights = st.session_state['flight_main'].copy()
+
         # Grab Past Location Data from Data Set
         LocData = dfs_comb[dfs_comb['Location_Name'] == st.session_state['sel_locN']]
         
