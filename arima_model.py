@@ -6,7 +6,7 @@ from weather_req_holiday import Weather_Requester,Holidayer
 
 Cabrv = {'IRDUB':'IE','NZAUK':'NZ'} # Country Codes
 def ARIMA_MD(loc_id:str,lat:float,long:float) -> pd.DataFrame:
-    with open(f"./Dataset/Crowd/arima_models/{loc_id}_arima.pkl", "rb") as f:
+    with open(f"./datasets/arima_models/{loc_id}_arima.pkl", "rb") as f:
         Ar_model = pickle.load(f)# grab right pickel file
 
     w = Weather_Requester(lat,long)# Grab weather from past and for future
