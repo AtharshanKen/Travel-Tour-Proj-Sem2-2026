@@ -10,7 +10,7 @@ import datetime
 from arima_model import ARIMA_MD 
 from knn_model import KNN_MD
 
-folder1 = "./datasets/Final"
+folder1 = "./datasets"
 dfs_comb = pd.DataFrame()
 for df in [pd.read_csv(os.path.join(folder1,f)) for f in os.listdir(folder1) if f.endswith('.csv')]:
     dfs_comb = pd.concat([dfs_comb,df],axis='rows')
