@@ -10,13 +10,13 @@ import datetime
 from arima_model import ARIMA_MD 
 from knn_model import KNN_MD
 
-folder1 = "./dataset/Final"
+folder1 = "./datasets/Final"
 dfs_comb = pd.DataFrame()
 for df in [pd.read_csv(os.path.join(folder1,f)) for f in os.listdir(folder1) if f.endswith('.csv')]:
     dfs_comb = pd.concat([dfs_comb,df],axis='rows')
 dfs_comb['Date'] = dfs_comb['Date'].apply(lambda x: parser.parse(x).date())#pd.to_datetime(dfs_comb["Date"]).dt.strftime("%Y-%m-%d %H:%M:%S")#dfs_comb['Date'].apply(lambda x: parser.parse(x).date())#datetime.date(YYYY, MM, DD)
 
-folder2 = "./dataset/flight_paths.csv"
+folder2 = "./datasets/flight_paths.csv"
 flights = pd.read_csv(folder2)
 flights['apt_time_dt_ds'] = flights['apt_time_dt_ds'].apply(lambda x: parser.parse(x).date())#pd.to_datetime(flights["apt_time_dt_ds"]).dt.strftime("%Y-%m-%d %H:%M:%S")#flights['apt_time_dt_ds'].apply(lambda x: parser.parse(x).date())#datetime.date(YYYY, MM, DD)
 flights['apt_time_dt_dp'] = flights['apt_time_dt_dp'].apply(lambda x: parser.parse(x).date())#pd.to_datetime(flights["apt_time_dt_dp"]).dt.strftime("%Y-%m-%d %H:%M:%S")#flights['apt_time_dt_dp'].apply(lambda x: parser.parse(x).date())
