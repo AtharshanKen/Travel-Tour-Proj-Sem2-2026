@@ -5,7 +5,7 @@ import pickle
 from sklearn.preprocessing import LabelEncoder,StandardScaler
 
 def KNN_MD(NewRCat:list,dfscomb:pd.DataFrame,loc_id:str)->pd.DataFrame:
-    with open(f"./Dataset/Crowd/knn_model/loc_knn.pkl", "rb") as f:
+    with open(f"./models/loc_knn.pkl", "rb") as f:
         knn_model = pickle.load(f) # grab right pickel file
     
     df = dfscomb.copy()
