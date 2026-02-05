@@ -29,11 +29,11 @@ def KNN_MD(NewRCat:list,dfscomb:pd.DataFrame,loc_id:str)->pd.DataFrame:
     df1['Day_Cos']   = df1['Date'].apply(lambda x: np.cos(2 * np.pi * (x.weekday()+1)/ 7))
 
     cols_to_use = [ # Not to be used but to tell what columns are being used
-        'Avg_Daily_Pedestrian_Count',
-        'Weather_Temperature_Avg',
-        'Weather_Wind_Speed_Avg',
-        'Weather_Precipitation_Sum',
-        'Weather_Relative_Humidity_Avg',
+        'PedsSen_Count',
+        'Weather_Temperature',
+        'Weather_Wind_Gust',
+        'Weather_Relative_Humidity',
+        'Weather_Precipitation',
         'Month_Sin',
         'Month_Cos',
         'Day_Sin',
@@ -44,7 +44,7 @@ def KNN_MD(NewRCat:list,dfscomb:pd.DataFrame,loc_id:str)->pd.DataFrame:
 
     X = df1.drop(columns=['Location_ID',
                         'Country',
-                        'City','Holiday',
+                        'City','Is_Holiday',
                         'Type_of_Attraction',
                         'Location_Name',
                         'Date'])
@@ -61,5 +61,5 @@ def KNN_MD(NewRCat:list,dfscomb:pd.DataFrame,loc_id:str)->pd.DataFrame:
             Found.loc[len(Found)] = df.loc[idx]
     
     # Keep the row found with lowest crowd
-    Found = Found.sort_values(by=['Avg_Daily_Pedestrian_Count']).reset_index(drop=True)
+    Found = Found.sort_values(by=['PedsSen_Count']).reset_index(drop=True)
     return Found.loc[0]
