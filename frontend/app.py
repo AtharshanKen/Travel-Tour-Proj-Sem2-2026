@@ -187,25 +187,25 @@ with midR[2]:
     if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
         # Get Only the selected location, attach the storeded FC session data to historical data
         pltdata = st.session_state["dfs_main"][st.session_state["dfs_main"]['Location_Name'] == st.session_state['sel_locN']]
-        pltdata = pd.concat([pltdata,st.session_state['FC_sel_Dest']],axis='index')[['Date','Avg_Daily_Pedestrian_Count']]
+        pltdata = pd.concat([pltdata,st.session_state['FC_sel_Dest']],axis='index')[['Date','PedsSen_Count']]
         pltdata['Date'] = pltdata['Date'].apply(lambda x: pd.to_datetime(x.strftime('%Y-%m-%d')))
 
         # Resample for monthly from daily, provides a better visual of the older + new data
         pltdata = pltdata.set_index('Date').resample('ME').mean().reset_index()
         pltdata = pltdata.rename(columns={
-            'Avg_Daily_Pedestrian_Count':'Avg Monthly Crowd Count',
+            'PedsSen_Count':'Monthly Crowd Count',
             })
         Tinfo = st.session_state["dfs_main"][['City','Country','Location_Name']].loc[st.session_state["dfs_main"]['Location_Name'] == st.session_state['sel_locN']].drop_duplicates().reset_index()
         fig = px.line(
                 pltdata,
                 x='Date',
-                y='Avg Monthly Crowd Count',
+                y='Monthly Crowd Count',
                 title=f"{Tinfo['Location_Name'].loc[0]} — Monthly Trend ---- [{Tinfo['Country'].loc[0]}/{Tinfo['City'].loc[0]}]",
                 markers=True
             )
         
         # Adding Forecast vertical line 
-        fig.add_vline(x=parser.parse('2025-09-30').timestamp()*1000, line_width=2, line_dash="dash", line_color="red", annotation_text="Forecast Start", annotation_position="bottom right")
+        fig.add_vline(x=parser.parse('2026-01-01').timestamp()*1000, line_width=2, line_dash="dash", line_color="red", annotation_text="Forecast Start", annotation_position="bottom right")
     
     else: # If user deselectes Orgin,Arv Time,Dest, then reset graph. 
         fig = px.line(
@@ -247,12 +247,12 @@ with lowR[2]: # Sueggestions
         FCArv = st.session_state['FC_sel_Dest'].loc[st.session_state['FC_sel_Dest']['Date'] == st.session_state['sel_Arv_dte']].reset_index(drop=True)
         FLArv = st.session_state['Flght_sel_Dest'].loc[st.session_state['Flght_sel_Dest']['apt_time_dt_ds'] == st.session_state['sel_Arv_dte']].reset_index(drop=True)
 
-        FClow = st.session_state['FC_sel_Dest'].loc[st.session_state['FC_sel_Dest']['Avg_Daily_Pedestrian_Count'] < FCArv['Avg_Daily_Pedestrian_Count'].loc[0]]
+        FClow = st.session_state['FC_sel_Dest'].loc[st.session_state['FC_sel_Dest']['PedsSen_Count'] < FCArv['PedsSen_Count'].loc[0]]
         FLlow = st.session_state['Flght_sel_Dest'].loc[st.session_state['Flght_sel_Dest']['apt_time_dt_ds'].isin(FClow['Date'].to_list())].reset_index(drop=True)
 
         StateBuilder = [] # Logic Statement Builder
 
-        StateBuilder.append(f"""<p class='poi-statO'>Forecast Crowd: {int(FCArv['Avg_Daily_Pedestrian_Count'].loc[0])} people<br></p>""")
+        StateBuilder.append(f"""<p class='poi-statO'>Forecast Crowd: {int(FCArv['PedsSen_Count'].loc[0])} people<br></p>""")
 
         if len(FLArv) > 0: 
             OthFlArv = '<br>'.join([f'{tp['apt_name_dp']} -- {tp['apt_time_dt_dp']} --> {tp['apt_name_ds']} -- {tp['apt_time_dt_ds']}  >>> ${tp['price']}' for i,tp in FLArv.nsmallest(n=20, columns='price').iterrows()][:3])
@@ -265,7 +265,7 @@ with lowR[2]: # Sueggestions
             )
 
         if len(FClow) > 0:
-            OthFCLow = '<br>'.join([f'People: {int(tp['Avg_Daily_Pedestrian_Count'])} -- {tp['Date']}' for i,tp in FClow.nsmallest(n=20, columns='Avg_Daily_Pedestrian_Count').iterrows() if tp['Date'] > date.today()][:3]) 
+            OthFCLow = '<br>'.join([f'People: {int(tp['PedsSen_Count'])} -- {tp['Date']}' for i,tp in FClow.nsmallest(n=20, columns='PedsSen_Count').iterrows() if tp['Date'] > date.today()][:3]) 
             StateBuilder.append(
                 f"""<p class='poi-statO'>Other Dates With Less Arvival Crowd Forecast<br> {OthFCLow}</p>"""
             ) 
@@ -309,7 +309,7 @@ with lowR[3]:# Recmmmendation
         StateBuilder2 = [] # Logic Satament Builder
 
         StateBuilder2.append(f"""<p class='poi-statO'>{RCArv['Location_Name'].loc[0]}, {RCArv['Country'].loc[0]}, {RCArv['City'].loc[0]} with past historical crowd numbers 
-                            lower than current selected, one of them being {int(RCArv['Avg_Daily_Pedestrian_Count'].loc[0])} people<br>You could consider traveling to here during {RCArv['Date'].loc[0].month}/{RCArv["Date"].loc[0].day}</p>""")
+                            lower than current selected, one of them being {int(RCArv['PedsSen_Count'].loc[0])} people<br>You could consider traveling to here during {RCArv['Date'].loc[0].month}/{RCArv["Date"].loc[0].day}</p>""")
        
         st.markdown(f"""
             <div class='poi-recbox'>

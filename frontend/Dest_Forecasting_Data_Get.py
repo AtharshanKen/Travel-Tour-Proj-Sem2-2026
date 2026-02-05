@@ -46,6 +46,8 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
         st.session_state['Flght_sel_Dest'] = flgData1 # save to sesssion state
         
         #Buidling the new row for KNN model, needed for building input
+        FCr = FC.any(lambda x : x['Date'] == st.session_state['sel_Arv_dte'])
+        print(FCr)
         NEwR = [MetaData['Country'],
                 MetaData['City'],
                 '-', # What we are predicting for recommending
@@ -55,12 +57,12 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
                 MetaData['Latitude'],
                 MetaData['Longitude'],
                 st.session_state['sel_Arv_dte'].isoformat(),
-                FC['Avg_Daily_Pedestrian_Count'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].item(),
-                FC['Holiday'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].item(),
-                FC['Weather_Temperature_Avg'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].item(),
-                FC['Weather_Wind_Speed_Avg'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].item(),
-                FC['Weather_Precipitation_Sum'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].item(),
-                FC['Weather_Relative_Humidity_Avg'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].item()]
+                FC['PedsSen_Count'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
+                FC['Weather_Temperature'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
+                FC['Weather_Wind_Gust'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
+                FC['Weather_Relative_Humidity'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
+                FC['Weather_Precipitation'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
+                FC['Is_Holiday'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0]]
         # RC = KNN_MD(NEwR,dfs_comb,MetaData['Location_ID']) # Get recommended areas with less crowd
         RC = requests.post(f"{API_URL}/Recommendation",json ={
             "NewR":NEwR,
