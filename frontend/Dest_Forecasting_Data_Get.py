@@ -46,7 +46,7 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
         st.session_state['Flght_sel_Dest'] = flgData1 # save to sesssion state
         
         #Buidling the new row for KNN model, needed for building input
-        FCr = FC.any(lambda x : x['Date'] == st.session_state['sel_Arv_dte'])
+        FCr = FC.loc[FC['Date'] == st.session_state['sel_Arv_dte']]
         print(FCr)
         NEwR = [MetaData['Country'],
                 MetaData['City'],
