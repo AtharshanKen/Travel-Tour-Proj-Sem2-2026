@@ -12,7 +12,7 @@ from knn_model import KNN_MD
 
 folder1 = "./datasets"
 dfs_comb = pd.DataFrame()
-for df in [pd.read_csv(os.path.join(folder1,f)) for f in os.listdir(folder1) if f.endswith('.csv')]:
+for df in [pd.read_csv(os.path.join(folder1,f)) for f in os.listdir(folder1) if f.endswith('daily.csv')]:
     dfs_comb = pd.concat([dfs_comb,df],axis='rows')
 dfs_comb['Date'] = dfs_comb['Date'].apply(lambda x: parser.parse(x).date())#pd.to_datetime(dfs_comb["Date"]).dt.strftime("%Y-%m-%d %H:%M:%S")#dfs_comb['Date'].apply(lambda x: parser.parse(x).date())#datetime.date(YYYY, MM, DD)
 
