@@ -28,12 +28,12 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
         LocData = dfs_comb[dfs_comb['Location_Name'] == st.session_state['sel_locN']]
         
         # Building Meta data used for KNN and ARIMA models 
-        MetaData = LocData[['Country','City','Location_ID','Location_Name','Type_of_Attraction','Attraction_Category','Latitude','Longitude']].drop_duplicates().reset_index(drop=True).loc[0]
+        MetaData = LocData[['Country','City','Location_ID','Location_Name','Type_of_Attraction','Attraction_Category','Latitude','Longitude']].loc[LocData.first_valid_index()]
         
         # Get Forcast data for th enext 180 day from trim point Sept 30 2025 to 180 days later from today
         # FC = ARIMA_MD(MetaData['Location_ID'],MetaData['Latitude'],MetaData['Longitude']) # Get Forecast for POI
         FC = requests.post(f"{API_URL}/Forecasting",json={"loc":MetaData['Location_ID'],"lat":MetaData['Latitude'],"long":MetaData['Longitude']}).json()
-        FC = date_conv_from(pd.DataFrame(FC),['Date']) with a 
+        FC = date_conv_from(pd.DataFrame(FC),['Date'])
         FC['Date'] = FC['Date'].apply(lambda x : pd.Timestamp(x).date())#datetime.date(YYYY, MM, DD)
         
         st.session_state['FC_sel_Dest'] = FC # save to sesssion state]
@@ -47,7 +47,6 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
         
         #Buidling the new row for KNN model, needed for building input
         FCr = FC.loc[FC['Date'] == st.session_state['sel_Arv_dte']]
-        print(FCr)
         NEwR = [MetaData['Country'],
                 MetaData['City'],
                 '-', # What we are predicting for recommending
@@ -57,12 +56,12 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
                 MetaData['Latitude'],
                 MetaData['Longitude'],
                 st.session_state['sel_Arv_dte'].isoformat(),
-                FC['PedsSen_Count'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
-                FC['Weather_Temperature'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
-                FC['Weather_Wind_Gust'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
-                FC['Weather_Relative_Humidity'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
-                FC['Weather_Precipitation'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0],
-                FC['Is_Holiday'].loc[FC['Date'] == st.session_state['sel_Arv_dte']].iloc[0]]
+                FCr['PedsSen_Count'].iloc[0],
+                FCr['Weather_Temperature'].iloc[0],
+                FCr['Weather_Wind_Gust'].iloc[0],
+                FCr['Weather_Relative_Humidity'].iloc[0],
+                FCr['Weather_Precipitation'].iloc[0],
+                FCr['Is_Holiday'].iloc[0]]
         # RC = KNN_MD(NEwR,dfs_comb,MetaData['Location_ID']) # Get recommended areas with less crowd
         RC = requests.post(f"{API_URL}/Recommendation",json ={
             "NewR":NEwR,
