@@ -1,3 +1,5 @@
+# Ignore custome 
+*.sqlite
 .streamlit
 
 # Byte-compiled / optimized / DLL files
