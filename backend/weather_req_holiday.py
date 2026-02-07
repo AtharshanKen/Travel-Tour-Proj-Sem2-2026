@@ -20,7 +20,7 @@ def Weather_Requester(lat:float,long:float) -> pd.DataFrame:
     params = {
         "latitude": lat,
         "longitude": long,
-        "start_date": '2026-01-01',
+        "start_date": '2024-12-31',
         "end_date": (date.today()-timedelta(days=1)).strftime('%Y-%m-%d'),
         "daily": ["temperature_2m_mean", "wind_gusts_10m_mean", "relative_humidity_2m_mean", "precipitation_sum"],
         "timezone": "auto"

@@ -33,7 +33,7 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
         # Get Forcast data for th enext 180 day from trim point Sept 30 2025 to 180 days later from today
         # FC = ARIMA_MD(MetaData['Location_ID'],MetaData['Latitude'],MetaData['Longitude']) # Get Forecast for POI
         FC = requests.post(f"{API_URL}/Forecasting",json={"loc":MetaData['Location_ID'],"lat":MetaData['Latitude'],"long":MetaData['Longitude']}).json()
-        FC = date_conv_from(pd.DataFrame(FC),['Date'])
+        FC = date_conv_from(pd.DataFrame(FC),['Date']) with a 
         FC['Date'] = FC['Date'].apply(lambda x : pd.Timestamp(x).date())#datetime.date(YYYY, MM, DD)
         
         st.session_state['FC_sel_Dest'] = FC # save to sesssion state]
@@ -46,7 +46,7 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
         st.session_state['Flght_sel_Dest'] = flgData1 # save to sesssion state
         
         #Buidling the new row for KNN model, needed for building input
-        FCr = FC.any(lambda x : x['Date'] == st.session_state['sel_Arv_dte'])
+        FCr = FC.loc[FC['Date'] == st.session_state['sel_Arv_dte']]
         print(FCr)
         NEwR = [MetaData['Country'],
                 MetaData['City'],

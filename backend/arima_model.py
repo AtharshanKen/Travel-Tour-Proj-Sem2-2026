@@ -6,14 +6,14 @@ from weather_req_holiday import Weather_Requester,Holidayer
 
 Cabrv = {'IRDUB':'IE','NZAUK':'NZ'} # Country Codes
 def ARIMA_MD(loc_id:str,lat:float,long:float) -> pd.DataFrame:
-    with open(f"./datasets/arima_models/{loc_id}_arima.pkl", "rb") as f:
+    with open(f"./models/{loc_id}_arima.pkl", "rb") as f:
         Ar_model = pickle.load(f)# grab right pickel file
 
     w = Weather_Requester(lat,long)# Grab weather from past and for future
     w.insert(4,'Is_Holiday',0)# Inserting these columns to match indep input
     w.insert(0,'Date',range(len(w))) # Use range to fill in date indexing numbers 
     # Add in the date range from trim point 2025-09-30
-    w['Date'] = w['Date'].apply(lambda x: datetime(2026,1,1).date() + timedelta(days=x))
+    w['Date'] = w['Date'].apply(lambda x: datetime(2024,12,31).date() + timedelta(days=x))
 
     h = Holidayer(w,Cabrv.get(loc_id.split('_')[0])) # Add in the holiday data
     h = h.set_index('Date').asfreq('D').interpolate(method='linear') # numeric only
