@@ -56,12 +56,13 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
                 MetaData['Latitude'],
                 MetaData['Longitude'],
                 st.session_state['sel_Arv_dte'].isoformat(),
-                FCr['PedsSen_Count'].iloc[0],
-                FCr['Weather_Temperature'].iloc[0],
-                FCr['Weather_Wind_Gust'].iloc[0],
-                FCr['Weather_Relative_Humidity'].iloc[0],
-                FCr['Weather_Precipitation'].iloc[0],
-                FCr['Is_Holiday'].iloc[0]]
+                FCr['PedsSen_Count'].iloc[0].item(),
+                FCr['Weather_Temperature'].iloc[0].item(),
+                FCr['Weather_Wind_Gust'].iloc[0].item(),
+                FCr['Weather_Relative_Humidity'].iloc[0].item(),
+                FCr['Weather_Precipitation'].iloc[0].item(),
+                FCr['Is_Holiday'].iloc[0].item()]
+        # for item in NEwR: print(item,type(item))
         # RC = KNN_MD(NEwR,dfs_comb,MetaData['Location_ID']) # Get recommended areas with less crowd
         RC = requests.post(f"{API_URL}/Recommendation",json ={
             "NewR":NEwR,

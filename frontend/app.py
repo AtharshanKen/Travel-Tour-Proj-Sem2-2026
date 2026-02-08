@@ -2,7 +2,8 @@ import streamlit as st
 import requests
 import os
 import pandas as pd
-from datetime import date,timedelta
+from datetime import date,timedelta,datetime
+import calendar
 from dateutil import parser
 import plotly.express as px
 
@@ -104,14 +105,53 @@ pois = poisUpdate() # used by the destination selection
 
 #^ LAYOUT STRUCTURE---------------------------- 
 O_W = 1
-uppR = st.columns([O_W,7,O_W]) 
+uppR = st.columns([O_W,7,O_W])
 midR = st.columns([O_W,3,4,O_W],gap='medium')
 lowR = st.columns([O_W,2,2.5,2.5,O_W],gap='small')
+
+#^ CSS-----------------------------------------
+st.markdown("""
+    <style>
+        .poi-recbox {
+            background-color: rgba(131, 131, 131, 0.50);
+            padding: 15px;
+            border-radius: 15px;
+            height: auto;
+            font-size:25px;
+        }
+        .poi-statO {
+            font-size:20px;
+        }
+        .poi-statI {
+            font-size:18px;
+        }
+        .scrollable-divMnthFC{
+            overflow: auto;
+            height: 450px;
+            white-space: nowrap;
+        }
+        .scrollable-divLang{
+            overflow-y: auto;
+            height: 650px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 #* ---------------------------- ROW 1: TITLE
 with uppR[1]:
     st.markdown("<h1 style='text-align:center; font-size:60px;'>Start Your Travel Journey</h1>", unsafe_allow_html=True)
     st.divider()
+st.divider()
+
+# with uppR[3]:
+#     st.subheader("Diclaimers")
+#     st.markdown(f"""
+#             <div class='poi-recbox'>
+#                 <p>Forecast Model still needs Improvements</p>
+#                 <p>Currency is in CAD, converts based on Origin</p>
+#                 <p>Weather metrics in (TEMP C),(GUST KM/H),(PRCEP MM),(REL HUM %)</p>
+#             </div>
+#             """, unsafe_allow_html=True)
 
 #* ---------------------------- ROW 2: OPTIONS & LOC EDA
 with midR[1]:
@@ -128,12 +168,10 @@ with midR[1]:
                             ,on_change=update_user_sel)
 
     with ops[2]:
-        nextday = date.today() + timedelta(days=1)
-        MaxD = nextday + timedelta(days=180)
         sel_Arv_dte =  st.date_input(
             "Select Travel Arrival Date",
-            min_value=nextday,
-            max_value=MaxD,
+            min_value=date.today(),
+            max_value=date.today() + timedelta(days=180),
             format="YYYY-MM-DD",
             key="sel_Arv_dte"
             ,on_change=update_user_sel)
@@ -187,26 +225,28 @@ with midR[2]:
     if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
         # Get Only the selected location, attach the storeded FC session data to historical data
         pltdata = st.session_state["dfs_main"][st.session_state["dfs_main"]['Location_Name'] == st.session_state['sel_locN']]
-        pltdata = pd.concat([pltdata,st.session_state['FC_sel_Dest']],axis='index')[['Date','PedsSen_Count']]
+        pltdata = pd.concat([pltdata,st.session_state['FC_sel_Dest']],axis='index')[['Date','PedsSen_Count','Weather_Temperature']]
         pltdata['Date'] = pltdata['Date'].apply(lambda x: pd.to_datetime(x.strftime('%Y-%m-%d')))
 
         # Resample for monthly from daily, provides a better visual of the older + new data
         pltdata = pltdata.set_index('Date').resample('ME').mean().reset_index()
         pltdata = pltdata.rename(columns={
             'PedsSen_Count':'Monthly Crowd Count',
+            'Weather_Temperature':'Monthly Temperature',
             })
         Tinfo = st.session_state["dfs_main"][['City','Country','Location_Name']].loc[st.session_state["dfs_main"]['Location_Name'] == st.session_state['sel_locN']].drop_duplicates().reset_index()
-        fig = px.line(
-                pltdata,
-                x='Date',
-                y='Monthly Crowd Count',
-                title=f"{Tinfo['Location_Name'].loc[0]} — Monthly Trend ---- [{Tinfo['Country'].loc[0]}/{Tinfo['City'].loc[0]}]",
-                markers=True
-            )
         
+        fig = px.line(
+            pltdata,
+            x='Date',
+            y='Monthly Crowd Count',
+            title=f"{Tinfo['Location_Name'].loc[0]} — Monthly Trend ---- [{Tinfo['Country'].loc[0]}/{Tinfo['City'].loc[0]}]",
+            markers=True
+        )
+
         # Adding Forecast vertical line 
         fig.add_vline(x=parser.parse('2026-01-01').timestamp()*1000, line_width=2, line_dash="dash", line_color="red", annotation_text="Forecast Start", annotation_position="bottom right")
-    
+
     else: # If user deselectes Orgin,Arv Time,Dest, then reset graph. 
         fig = px.line(
                     title=f"Destination-Orgin-Time not Selected",
@@ -221,24 +261,7 @@ with midR[2]:
                       margin=dict(l=10,r=10,t=40,b=10))
     plot = st.plotly_chart(fig, use_container_width=True)
 
-#* ---------------------------- ROW 3: TRANSLATOR & SUGGESTION & RECOMMENDATION
-st.markdown("""
-    <style>
-        .poi-recbox {
-            background-color: rgba(131, 131, 131, 0.50);
-            padding: 15px;
-            border-radius: 15px;
-            height: auto;
-            font-size:25px;
-        }
-        .poi-statO {
-            font-size:20px;
-        }
-        .poi-statI {
-            font-size:18px;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+#* ---------------------------- ROW 3: TRANSLATOR & SUGGESTION & RECOMMENDATION & MONTH DAILY FC RESULTS
 # Below are the AI Features for Sugesting and Recommending 
 with lowR[2]: # Sueggestions
     st.subheader("Suggestions")
@@ -318,7 +341,7 @@ with lowR[3]:# Recmmmendation
             """, unsafe_allow_html=True)
         
         st.session_state['recommend'] = StateBuilder2 # Save in session for OpenAI to translate to user
-
+    
     else: # Empty div when one of the itinerary selections is deselected
         st.markdown(f"""
             <div class='poi-recbox'>
@@ -326,7 +349,39 @@ with lowR[3]:# Recmmmendation
             """, unsafe_allow_html=True)
         
         st.session_state['recommend'] = [] # Reset for new session info to be saved when user deselects itinerary
-
+    
+    st.subheader("Month Forcast Numbers")
+    if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
+        dts_sel = st.session_state['sel_Arv_dte']
+        num_days = calendar.monthrange(dts_sel.year, dts_sel.month)[1]
+        start_dte = datetime(dts_sel.year,dts_sel.month,1).date()
+        end_dte = datetime(dts_sel.year,dts_sel.month,num_days).date()
+        month_fc = st.session_state['FC_sel_Dest'][(st.session_state['FC_sel_Dest']['Date'] >= start_dte) & (st.session_state['FC_sel_Dest']['Date'] <= end_dte)]
+        month_fc = month_fc.drop(columns=['Is_Holiday'])
+        month_fc = month_fc.rename(columns={
+            'Weather_Temperature':'Temp',
+            'Weather_Wind_Gust':'Gust',
+            'Weather_Relative_Humidity':'Rel Hum',
+            'Weather_Precipitation':'Precp',
+            'PedsSen_Count':'Daily Crowd'
+        })
+        month_fc = month_fc.loc[:,['Date','Daily Crowd','Temp','Gust','Rel Hum','Precp']]
+        st.markdown(f"""
+            <div class='poi-recbox scrollable-divMnthFC'>
+                {month_fc.to_html(formatters={'Daily Crowd':'{:,.0f}'.format,
+                                               'Temp':'{:,.2f}'.format,
+                                               'Gust':'{:,.2f}'.format,
+                                               'Rel Hum':'{:,.2f}'.format,
+                                               'Precp':'{:,.2f}'.format
+                                            }, index=False)}
+            </div>
+            """, unsafe_allow_html=True)
+    
+    else:
+        st.markdown(f"""
+            <div class='poi-recbox'>
+            </div>
+            """, unsafe_allow_html=True)
 
 with lowR[1]:
     st.subheader("Language Translator")
@@ -345,7 +400,7 @@ with lowR[1]:
             )
 
             st.markdown(f"""
-                <div class='poi-recbox'>
+                <div class='poi-recbox scrollable-divLang'>
                         {resp.choices[0].message.content}
                 </div>
                 """, unsafe_allow_html=True)
