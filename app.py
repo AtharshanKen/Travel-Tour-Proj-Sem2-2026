@@ -363,7 +363,7 @@ with lowR[3]:# Recmmmendation
             'Weather_Wind_Gust':'Gust',
             'Weather_Relative_Humidity':'Rel Hum',
             'Weather_Precipitation':'Precp',
-            'PedsSen_Count':'Daily Crowd'
+            'PedsSen_Count':'Daily Cr
         })
         month_fc = month_fc.loc[:,['Date','Daily Crowd','Temp','Gust','Rel Hum','Precp']]
         st.markdown(f"""
