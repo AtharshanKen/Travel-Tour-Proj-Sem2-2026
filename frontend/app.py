@@ -44,6 +44,7 @@ page_bg_img = '''
 </style>'''
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
+#^ Data convert from Backend------------------- 
 def date_conv_from(df:pd.DataFrame,dates:list) -> pd.DataFrame:
     for cn in dates:
         df[cn] = pd.to_datetime(df[cn], errors="coerce").dt.date
