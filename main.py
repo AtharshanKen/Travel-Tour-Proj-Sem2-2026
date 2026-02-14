@@ -103,6 +103,6 @@ async def openai_api(input:open_AI):
                 temperature=0.2,
                 tools=[{"type": "web_search"}]
         )
-        return {"resp":resp.choices[0].message.content}
+        return {"resp":resp.output_text}
     except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
