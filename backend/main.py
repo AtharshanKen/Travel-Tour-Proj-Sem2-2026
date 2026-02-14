@@ -99,7 +99,8 @@ async def openai_api(input:open_AI):
                     "role":input.role,
                     "content":input.content
                 }],
-                temperature=0.2
+                temperature=0.2,
+                tools=[{"type": "web_search"}]
         )
         return {"resp":resp.choices[0].message.content}
     except Exception as e:
