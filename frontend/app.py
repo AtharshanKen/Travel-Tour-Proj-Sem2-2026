@@ -6,14 +6,15 @@ from datetime import date,timedelta,datetime
 import calendar
 from dateutil import parser
 import plotly.express as px
+import time
 
 #^ Getting OpenAI Key---------------------------
-from openai import OpenAI
-#Set key from secrets 
-api = os.environ.get("OPENAI_API_KEY")
-if api is None:
-    api = st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=api)
+# from openai import OpenAI
+# #Set key from secrets 
+# api = os.environ.get("OPENAI_API_KEY")
+# if api is None:
+#     api = st.secrets["OPENAI_API_KEY"]
+# client = OpenAI(api_key=api)
 
 # Used for Getting forecasting data from selected location 
 from Dest_Forecasting_Data_Get import Dest_Forecastig_Data_Get 
@@ -23,7 +24,21 @@ from poisUpdate import poisUpdate
 
 #^ Backend Connection----------------------------
 # In Docker/Heroku you’ll point this to the backend service URL
-API_URL = os.getenv("API_URL", "http://localhost:8000")
+API_URL = os.environ.get("BACK_END_CONN")
+if API_URL is None:
+    API_URL = os.getenv("API_URL", "http://localhost:8000")
+
+with st.spinner("Connecting to service....."):
+    for tr in range(5):
+        try:
+            res = requests.get(f"{API_URL}/Health", timeout=2.5)
+            if res.status_code == 200:
+                break
+        except:
+            time.sleep(1)
+        if tr == 4:
+            st.error("Backend service not avaiable at this time")
+            st.stop()
 
 #^ PAGE CONFIGURATION---------------------------- 
 st.set_page_config(
@@ -140,19 +155,20 @@ st.markdown("""
 
 #* ---------------------------- ROW 1: TITLE
 with uppR[1]:
-    st.markdown("<h1 style='text-align:center; font-size:60px;'>Start Your Travel Journey</h1>", unsafe_allow_html=True)
+    Header = st.columns([4,7,4])
+    with Header[1]: 
+        st.markdown("<h1 style='text-align:center; font-size:60px;'>Start Your Travel Journey</h1>", unsafe_allow_html=True)
+    with Header[2]:
+        st.markdown(f"""
+                <div class='poi-recbox'>
+                    <h2>Disclaimers</h2>
+                    <p>Forecast Model still needs Improvements</p>
+                    <p>Currency is in CAD, converts based on Origin</p>
+                    <p>Weather metrics in (TEMP C),(GUST KM/H),(PRCEP MM),(REL HUM %)</p>
+                </div>
+                """, unsafe_allow_html=True)
     st.divider()
 st.divider()
-
-# with uppR[3]:
-#     st.subheader("Diclaimers")
-#     st.markdown(f"""
-#             <div class='poi-recbox'>
-#                 <p>Forecast Model still needs Improvements</p>
-#                 <p>Currency is in CAD, converts based on Origin</p>
-#                 <p>Weather metrics in (TEMP C),(GUST KM/H),(PRCEP MM),(REL HUM %)</p>
-#             </div>
-#             """, unsafe_allow_html=True)
 
 #* ---------------------------- ROW 2: OPTIONS & LOC EDA
 with midR[1]:
@@ -391,18 +407,22 @@ with lowR[1]:
     user_input = st.text_area("-", placeholder=f"Type what language to tranlate to\n Languages like: {','.join(language_list)},.etc", label_visibility='hidden')
     if st.session_state['sel_org'] != None and st.session_state['sel_Arv_dte'] != None and st.session_state['sel_locN'] != None:
         if user_input != "":
-            resp = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role":"user","content":f"Translate just the non html of this "+
+            payload = {"role":"user",
+                       "content":f"Translate just the non html of this "+
                                             f"{''.join(st.session_state['suggest'])}{''.join(st.session_state['recommend'])} into {user_input}, "+
                                             "and output only the translated text following the html format"}
-                ]
-            )
-
+            resp = requests.post(f"{API_URL}/OPENAI",json=payload).json()
+            # resp = client.chat.completions.create(
+            #     model="gpt-4o-mini",
+            #     messages=[
+            #         {"role":"user","content":f"Translate just the non html of this "+
+            #                                 f"{''.join(st.session_state['suggest'])}{''.join(st.session_state['recommend'])} into {user_input}, "+
+            #                                 "and output only the translated text following the html format"}
+            #     ]
+            # )
             st.markdown(f"""
                 <div class='poi-recbox scrollable-divLang'>
-                        {resp.choices[0].message.content}
+                        {resp['resp']}
                 </div>
                 """, unsafe_allow_html=True)
     else: # Empty div when one of the itinerary selections is deselected

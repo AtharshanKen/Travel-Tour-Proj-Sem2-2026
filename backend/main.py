@@ -1,10 +1,27 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-# from Cal import Cal
+from fastapi import FastAPI , HTTPException
+from typing import Literal
+from pydantic import BaseModel, Field
+from pydantic.v1 import BaseSettings
+from pathlib import Path
 from dateutil import parser
 import pandas as pd
 import os
 import datetime
+
+#Adding env for open ai key, maps to .env for use for local work if no container env key
+from openai import AsyncOpenAI
+class Settings(BaseSettings):
+    openai_api_key: str
+    class Config:
+        env_file = ".env"
+        env_file_encoding = 'utf-8'
+
+settings = Settings()
+
+api = os.environ.get("OPENAI_API_KEY")
+if api is None:
+    api = settings.openai_api_key
+client = AsyncOpenAI(api_key=api)
 
 # Model Exc File
 from arima_model import ARIMA_MD 
@@ -34,9 +51,13 @@ def date_conv_from(df:pd.DataFrame,dates:list) -> pd.DataFrame:
         df[cn] = pd.to_datetime(df[cn], errors="coerce").dt.date
     return df
 
-@app.post("/Health")
-async def backend_up():
-    return 
+@app.get("/")
+def root():
+    return {"message":"Hello"}
+
+@app.get("/Health")
+def backend_up():
+    return {"status": "alive"}
 
 # def obtain_models():
 #     return 
@@ -64,3 +85,22 @@ async def recommendation(input:RecReq):
     kn = KNN_MD(input.NewR,df,input.loc)
     kn['Date'] = pd.to_datetime(kn['Date'], errors="coerce").strftime("%Y-%m-%d %H:%M:%S")
     return kn.to_dict()
+
+
+class open_AI(BaseModel):
+    role: str 
+    content:str 
+@app.post("/OPENAI")
+async def openai_api(input:open_AI):
+    try:
+        resp =  await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{
+                    "role":input.role,
+                    "content":input.content
+                }],
+                temperature=0.2
+        )
+        return {"resp":resp.choices[0].message.content}
+    except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
