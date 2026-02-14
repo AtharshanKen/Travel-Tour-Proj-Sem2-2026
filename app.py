@@ -25,6 +25,7 @@ from poisUpdate import poisUpdate
 #^ Backend Connection----------------------------
 # In Docker/Heroku you’ll point this to the backend service URL
 API_URL = os.environ.get("BACK_END_CONN")
+print(API_URL)
 if not API_URL:
     API_URL = os.getenv("API_URL", "http://localhost:8000")
 
