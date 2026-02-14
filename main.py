@@ -93,7 +93,7 @@ class open_AI(BaseModel):
 @app.post("/OPENAI")
 async def openai_api(input:open_AI):
     try:
-        resp =  await client.chat.completions.create(
+        resp =  await client.responses.create(
                 model="gpt-4o-mini",
                 messages=[{
                     "role":input.role,
