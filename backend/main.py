@@ -7,7 +7,6 @@ from dateutil import parser
 import pandas as pd
 import os
 import datetime
-import requests
 
 #Adding env for open ai key, maps to .env for use for local work if no container env key
 from openai import AsyncOpenAI
