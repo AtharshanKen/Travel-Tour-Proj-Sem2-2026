@@ -95,7 +95,7 @@ async def openai_api(input:open_AI):
     try:
         resp =  await client.responses.create(
                 model="gpt-4o-mini",
-                input = input.role,
+                input = input.content,
                 # messages=[{
                 #     "role":input.role,
                 #     "content":input.content
