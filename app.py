@@ -23,9 +23,8 @@ from Dest_Forecasting_Data_Get import Dest_Forecastig_Data_Get
 from poisUpdate import poisUpdate
 
 #^ Backend Connection----------------------------
-# In Docker/Heroku you’ll point this to the backend service URL
+# In Docker/Heroku point this to the backend service URL
 API_URL = os.environ.get("BACK_END_CONN")
-print(API_URL)
 if not API_URL:
     API_URL = os.getenv("API_URL", "http://localhost:8000")
 
@@ -81,11 +80,11 @@ if "dfs_main" not in st.session_state and "flight_main" not in st.session_state:
     # st.session_state["flight_main"]['apt_time_dt_dp'] = st.session_state["flight_main"]['apt_time_dt_dp'].apply(lambda x: parser.parse(x).date())
 # print(type(st.session_state["dfs_main"]['Date'].loc[0]))
 # print(type(st.session_state["flight_main"]['apt_time_dt_ds'].loc[0]))
-# --- OPENAI DEF MODEL ---
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
-if "messages" not in st.session_state:# Initialize chat history
-    st.session_state.messages = []
+# # --- OPENAI DEF MODEL ---
+# if "openai_model" not in st.session_state:
+#     st.session_state["openai_model"] = "gpt-3.5-turbo"
+# if "messages" not in st.session_state:# Initialize chat history
+#     st.session_state.messages = []
 # --- SUGGESTIONS & ALT RECOMMENDATIONS TEXT ---
 if "suggest" not in st.session_state:
     st.session_state["suggest"] = []
