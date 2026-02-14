@@ -95,10 +95,11 @@ async def openai_api(input:open_AI):
     try:
         resp =  await client.responses.create(
                 model="gpt-4o-mini",
-                messages=[{
-                    "role":input.role,
-                    "content":input.content
-                }],
+                input = input.role,
+                # messages=[{
+                #     "role":input.role,
+                #     "content":input.content
+                # }],
                 temperature=0.2,
                 tools=[{"type": "web_search"}]
         )
