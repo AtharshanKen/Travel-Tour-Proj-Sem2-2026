@@ -4,7 +4,9 @@ from datetime import date
 import requests
 import os
 
-API_URL = os.getenv("API_URL", "http://localhost:8000")
+API_URL = os.environ.get("BACK_END_CONN")
+if not API_URL:
+    API_URL = os.getenv("API_URL", "http://localhost:8000")
 # # Model Exc File
 # from arima_model import ARIMA_MD 
 # from knn_model import KNN_MD
