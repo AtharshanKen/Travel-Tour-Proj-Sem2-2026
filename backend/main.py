@@ -7,6 +7,7 @@ from dateutil import parser
 import pandas as pd
 import os
 import datetime
+import requests
 
 #Adding env for open ai key, maps to .env for use for local work if no container env key
 from openai import AsyncOpenAI
@@ -80,15 +81,10 @@ class RecReq(BaseModel):
     loc:str
 @app.post("/Recommendation")
 async def recommendation(input:RecReq):
-    print('-1-')
     input.NewR[8] = datetime.date.fromisoformat(input.NewR[8])
-    print('-2-')
     # df = date_conv_from(pd.read_json(input.main),['Date'])
-    print('-3-')
     kn = KNN_MD(input.NewR,dfs_comb,input.loc)
-    print('-4-')
     kn['Date'] = pd.to_datetime(kn['Date'], errors="coerce").strftime("%Y-%m-%d %H:%M:%S")
-    print('-5-')
     return kn.to_dict()
 
 
