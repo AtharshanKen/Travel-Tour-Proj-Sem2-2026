@@ -68,7 +68,7 @@ def Dest_Forecastig_Data_Get(): # Get users destination data once orgin and data
         # RC = KNN_MD(NEwR,dfs_comb,MetaData['Location_ID']) # Get recommended areas with less crowd
         RC = requests.post(f"{API_URL}/Recommendation",json ={
             "NewR":NEwR,
-            "main":date_conv_to(dfs_comb,['Date']),
+            # "main":date_conv_to(dfs_comb,['Date']),
             "loc":MetaData['Location_ID']
         }).json()
         RC = pd.DataFrame([RC])

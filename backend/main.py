@@ -76,16 +76,16 @@ async def forecasting(input:FrCtReq):
 
 class RecReq(BaseModel):
     NewR:list
-    main:str
+    # main:str
     loc:str
 @app.post("/Recommendation")
 async def recommendation(input:RecReq):
     print('-1-')
     input.NewR[8] = datetime.date.fromisoformat(input.NewR[8])
     print('-2-')
-    df = date_conv_from(pd.read_json(input.main),['Date'])
+    # df = date_conv_from(pd.read_json(input.main),['Date'])
     print('-3-')
-    kn = KNN_MD(input.NewR,df,input.loc)
+    kn = KNN_MD(input.NewR,dfs_comb,input.loc)
     print('-4-')
     kn['Date'] = pd.to_datetime(kn['Date'], errors="coerce").strftime("%Y-%m-%d %H:%M:%S")
     print('-5-')
