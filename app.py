@@ -13,7 +13,7 @@ from posthog import Posthog
 #^ Setting up PostHog----------------------
 PHG_API = os.environ.get("PHG_API")
 if not PHG_API:
-    PHG_API = os.getenv("PHG_API")
+    PHG_API = st.secrets["PHG_API"]
 posthog = Posthog(
     project_api_key=PHG_API,
     host='https://us.i.posthog.com'
