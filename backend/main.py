@@ -76,13 +76,13 @@ async def forecasting(input:FrCtReq):
 
 class RecReq(BaseModel):
     NewR:list
-    main:str
+    # main:str
     loc:str
 @app.post("/Recommendation")
 async def recommendation(input:RecReq):
     input.NewR[8] = datetime.date.fromisoformat(input.NewR[8])
-    df = date_conv_from(pd.read_json(input.main),['Date'])
-    kn = KNN_MD(input.NewR,df,input.loc)
+    # df = date_conv_from(pd.read_json(input.main),['Date'])
+    kn = KNN_MD(input.NewR,dfs_comb,input.loc)
     kn['Date'] = pd.to_datetime(kn['Date'], errors="coerce").strftime("%Y-%m-%d %H:%M:%S")
     return kn.to_dict()
 
@@ -93,15 +93,16 @@ class open_AI(BaseModel):
 @app.post("/OPENAI")
 async def openai_api(input:open_AI):
     try:
-        resp =  await client.chat.completions.create(
+        resp =  await client.responses.create(
                 model="gpt-4o-mini",
-                messages=[{
-                    "role":input.role,
-                    "content":input.content
-                }],
+                input = input.content,
+                # messages=[{
+                #     "role":input.role,
+                #     "content":input.content
+                # }],
                 temperature=0.2,
                 tools=[{"type": "web_search"}]
         )
-        return {"resp":resp.choices[0].message.content}
+        return {"resp":resp.output_text}
     except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
