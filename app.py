@@ -7,7 +7,18 @@ import calendar
 from dateutil import parser
 import plotly.express as px
 import time
+import uuid
+from posthog import Posthog
 
+#^ Setting up PostHog----------------------
+PHG_API = os.environ.get("PHG_API")
+if not PHG_API:
+    PHG_API = os.getenv("PHG_API")
+posthog = Posthog(
+    project_api_key=PHG_API,
+    host='https://us.i.posthog'
+)
+posthog.capture('user_enters_webpage',distinct_id=str(uuid.uuid4()),properties={'example_property':'example_value'})
 #^ Getting OpenAI Key---------------------------
 # from openai import OpenAI
 # #Set key from secrets 
