@@ -73,25 +73,33 @@ posthog = Posthog(
     project_api_key=PHG_API,
     host=PHG_HST
 )
-componets.html(
-    '''
+# Most help cam efrom ChatGPT as the HTML condifg side 
+posthog_html =''' 
     <script>
+        (function() {{
+            // Prevent duplicates on Streamlit reruns (per iframe session)
+            if (window.sessionStorage && sessionStorage.getItem("ph_pageview_sent") === "1") {{
+                return;
+            }}
         !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-    ''' + f'''
-    posthog.init("{PHG_API}", {{api_host: "{PHG_HST}"}});
-    posthog.capture('$pageview');
-    // Send distinct_id back to Streamlit via window.parent
-            setTimeout(function() {{
-                const id = posthog.get_distinct_id();
-                window.parent.postMessage({{
-                    type: "POSTHOG_ID",
-                    distinct_id: id
-                }}, "*");
-            }}, 500);
+        // Init with pageview capture in "loaded" callback (ensures library is ready)
+          posthog.init("PHG_API", {{
+            api_host: "PHG_HST",
+            autocapture: true,
+            loaded: function(ph) {{
+              try {{
+                ph.capture("$pageview");
+                if (window.sessionStorage) sessionStorage.setItem("ph_pageview_sent", "1");
+                console.log("PostHog $pageview sent. distinct_id=", ph.get_distinct_id());
+              }} catch (e) {{
+                console.log("PostHog capture failed", e);
+              }}
+            }}
+          }});
+        }})();
     </script>
-    ''',
-    height = 0
-)
+'''
+
 # posthog_html = '''
 # <script>
 #//     !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
@@ -101,9 +109,10 @@ componets.html(
 #     posthog.capture("$pageview", {{ page: window.location.pathname }});
 # </script>
 # ''' 
-# componets.html(posthog_html, height=0)
+posthog_html.replace("PHG_API", PHG_API).replace("PHG_HST", PHG_API)
+componets.html(posthog_html, height=0)
 # Uuid = str(uuid.uuid4())
-posthog.capture(event='user_enters_webpage',properties={'example_property':'example_value'})
+# posthog.capture(event='user_enters_webpage',properties={'example_property':'example_value'})
 # posthog.flush()
 #^ Data convert from Backend------------------- 
 def date_conv_from(df:pd.DataFrame,dates:list) -> pd.DataFrame:
