@@ -65,7 +65,7 @@ st.markdown(page_bg_img, unsafe_allow_html=True)
 #^ Setting up PostHog----------------------
 # Generate an anonymous ID once per session  
 if 'anon_id' not in st.session_state:  
-    st.session_stat['anon_id'] = str(uuid.uuid4())
+    st.session_state['anon_id'] = str(uuid.uuid4())
 PHG_API = os.environ.get("PHG_API")
 if not PHG_API:
     PHG_API = st.secrets["PHG_API"]
