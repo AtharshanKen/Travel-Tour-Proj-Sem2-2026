@@ -72,7 +72,10 @@ class FrCtReq(BaseModel):
     long:float
 @app.post("/Forecasting")
 async def forecasting(input:FrCtReq):
-    return date_conv_to(ARIMA_MD(input.loc,input.lat,input.long),['Date'])
+    fc = ARIMA_MD(input.loc,input.lat,input.long)
+    print(fc['Date'].loc[0])
+    print(dfs_comb[dfs_comb['Location_ID'] == input.loc].loc[-365:])
+    return date_conv_to(fc,['Date'])
 
 class RecReq(BaseModel):
     NewR:list
