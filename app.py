@@ -404,8 +404,8 @@ with lowR[2]: # Sueggestions
 
         payload = {"content":
         f"Translate only the user-facing English text in this HTML file into {st.session_state['user_input'] }.\n"+
-        f"Convert any currency found in the html to the currency linked to this city: {st.session_state['sel_org'] }.\n"+ 
-        "Default to CAD for any currency in the html if currency could not be converted and place a 'Could not convert to origin currency' at the bottom of the html.\n"+ 
+        f"Convert any currency found in the html to the currency linked to this city origin of {st.session_state['sel_org'] }.\n"+ 
+        f"Default to CAD for currency in the html if currency failed to convert in previous task and place a 'Currency in CAD' followed by 'could not find Origin currency', if city Origin of {st.session_state['sel_org']} not in Canada, at the bottom of the html.\n"+ 
         "Default to English language if translating html text failed.\n\n"+
 
         "STRICT RULES:\n"+
@@ -413,6 +413,8 @@ with lowR[2]: # Sueggestions
         "- Do NOT modify tags, attributes, IDs, class names, JavaScript, CSS, or variables.\n"+
         "- Do NOT translate text inside <script>, <style>, meta tags, or comments.\n"+
         "- Maintain spacing and formatting.\n"+
+        "- Any Currency has ',' placed in correct places.\n"+
+        "- Any number in front of people has ',' placed in correct places.\n"+
         "- Only translate text that is rendered visibly in the browser.\n\n"+
 
         "OUTPUT FORMAT RULES (CRITICAL):\n"+
@@ -470,8 +472,8 @@ with lowR[3]:# Recmmmendation
                             lower than current selected, one of them being {int(RCArv['PedsSen_Count'].loc[0])} people<br>You could consider traveling to here during {RCArv['Date'].loc[0].month}/{RCArv["Date"].loc[0].day}</p>""")
         payload = {"content":
         f"Translate only the user-facing English text in this HTML file into {st.session_state['user_input'] }.\n"+
-        f"Convert any currency found in the html to the currency linked to this city: {st.session_state['sel_org'] }.\n"+ 
-        "Default to CAD for any currency in the html if currency could not be converted and place a 'Could not convert to origin currency' at the bottom of the html.\n"+ 
+        f"Convert any currency found in the html to the currency linked to this city origin of {st.session_state['sel_org'] }.\n"+ 
+        f"Default to CAD for currency in the html if currency failed to convert in previous task and place a 'Currency in CAD' followed by 'could not find Origin currency', if city Origin of {st.session_state['sel_org']} not in Canada, at the bottom of the html.\n"+ 
         "Default to English language if translating html text failed.\n\n"+
 
         "STRICT RULES:\n"+
@@ -479,6 +481,8 @@ with lowR[3]:# Recmmmendation
         "- Do NOT modify tags, attributes, IDs, class names, JavaScript, CSS, or variables.\n"+
         "- Do NOT translate text inside <script>, <style>, meta tags, or comments.\n"+
         "- Maintain spacing and formatting.\n"+
+        "- Any Currency has ',' placed in correct places.\n"+
+        "- Any number in front of people has ',' placed in correct places.\n"+
         "- Only translate text that is rendered visibly in the browser.\n\n"+
 
         "OUTPUT FORMAT RULES (CRITICAL):\n"+
